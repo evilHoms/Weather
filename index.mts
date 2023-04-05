@@ -5,6 +5,29 @@ config();
 
 const city = process.argv[2] as string | undefined;
 
+const getEmoji = (w: string) => {
+    const weather = w.toLowerCase();
+    if (weather.includes("rain")) {
+        return "🌧️ ";
+    }
+
+    if (weather.includes("snow")) {
+        return "🌨️";
+    }
+
+    if (weather.includes("sun")) {
+        return "🌞";
+    }
+
+    if (weather.includes("fog")) {
+        return "🌫️";
+    }
+
+    if (weather.includes("cloud") || weather === "overcast") {
+        return "⛅";
+    }
+};
+
 if (!city) {
     console.error("Error: No city specified. Add city name as parameter.");
     exit(1);
@@ -54,12 +77,16 @@ const formatLocationOptupt = (l: Location) => {
 };
 
 const formatCurrentOutput = (c: Current) => {
-    return `Now is ${c.condition.text}, ${c.temp_c}C, wind is ${c.wind_kph}km/h ${c.wind_dir}`;
+    return `${getEmoji(c.condition.text)} Now is ${c.condition.text}, ${
+        c.temp_c
+    }C, wind is ${c.wind_kph}km/h ${c.wind_dir}`;
 };
 
 const formatForecastOutput = (f: Forecast) => {
     return f.forecastday.reduce((acc, { date, day }) => {
-        acc += `${date}: ${day.condition.text}, ${day.mintemp_c}C-${day.maxtemp_c}C, wind ${day.maxwind_kph}km/h\n`;
+        acc += `${getEmoji(day.condition.text)} ${date}: ${
+            day.condition.text
+        }, ${day.mintemp_c}C-${day.maxtemp_c}C, wind ${day.maxwind_kph}km/h\n`;
         return acc;
     }, "");
 };
@@ -108,6 +135,7 @@ getForecast(city).then((res) => {
         formatLocationOptupt(res.location) +
         "\n" +
         formatCurrentOutput(res.current) +
+        "\n" +
         "\n" +
         formatForecastOutput(res.forecast);
     console.log(output);
